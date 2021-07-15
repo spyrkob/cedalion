@@ -112,6 +112,7 @@ pipeline {
                 } catch (err) {
                   echo "Error during build ${err}"
                 }
+                junit "**/target/surefire-reports/*.xml"
                 determineBuildResult()
             }
             }
