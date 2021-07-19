@@ -30,7 +30,7 @@ pipeline {
                 }
 
                 dir('hera') {
-                  git branch: 'cct', url: 'https://github.com/xstefank/hera.git'
+                  git branch: 'cct_locale_issue', url: 'https://github.com/jboss-set/hera.git'
                 }
 
                 dir('harmonia') {
