@@ -29,30 +29,29 @@ pipeline {
         stage('Prep') {
             steps {
                 cleanWs()
+                dir('hera') {
+                  git branch: 'set-358_mount_ssh', url: 'https://github.com/gaol/hera.git'
+                }
+                dir('harmonia') {
+                  git branch: 'cryo', url: 'https://github.com/gaol/harmonia.git'
+                }
+                sh "mkdir -p workdir"
                 script {
                     // warning, GIT_BRANCH var alreads points to pipeline's branch
                     if ( env.GIT_REPOSITORY_BRANCH == null || "".equals("${env.GIT_REPOSITORY_BRANCH}") ) {
                       env.GIT_REPOSITORY_BRANCH = "master"
                     }
                     echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
-                }
-                dir('workdir') {
-                  git url: "${env.GIT_REPOSITORY_URL}",
-                      branch: "${env.GIT_REPOSITORY_BRANCH}"
-                }
-                dir('hera') {
-                  git branch: 'set-358_mount_ssh', url: 'https://github.com/gaol/hera.git'
-                }
-                dir('auxilia') {
-                  git 'https://github.com/jboss-set/auxilia.git'
-                }
-                dir('harmonia') {
-                  git branch: 'cryo', url: 'https://github.com/gaol/harmonia.git'
-                }
-                script {
                     env.BUILD_COMMAND = ""
                     def parent_jobname = ""
                     if ( "${env.JOB_NAME}".endsWith("-repository-build") ) {
+                        dir('workdir') {
+                          git url: "${env.GIT_REPOSITORY_URL}",
+                              branch: "${env.GIT_REPOSITORY_BRANCH}"
+                        }
+                        dir('auxilia') {
+                          git 'https://github.com/jboss-set/auxilia.git'
+                        }
                         env.BUILD_COMMAND = "repository"
                         env.HARMONIA_SCRIPT = "cryo.sh"
                         parent_jobname = "ci-cryo"
@@ -85,7 +84,7 @@ pipeline {
             when { expression { env.BUILD_COMMAND == 'repository' } }
             steps {
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
-                archiveArtifacts artifacts: 'workdir/*.tar.gz', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
+                archiveArtifacts artifacts: '**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                 findText(textFinders: [
                     textFinder(regexp: ".*CRYO.*SUCCESS.*(Dry run complete|Push future).*", alsoCheckConsoleOutput: true, buildResult: 'SUCCESS', changeCondition: 'MATCH_FOUND')
                 ])
