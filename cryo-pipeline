@@ -22,11 +22,9 @@ def dumpParameters(String outputFile) {
 
 pipeline {
     agent any
-
     options {
       buildDiscarder(logRotator(numToKeepStr: '2', artifactNumToKeepStr: '2'))
     }
-
     stages {
         stage('Prep') {
             steps {
@@ -51,27 +49,90 @@ pipeline {
                 dir('harmonia') {
                   git branch: 'cryo', url: 'https://github.com/gaol/harmonia.git'
                 }
-
                 script {
+                    env.BUILD_COMMAND = ""
+                    def parent_jobname = ""
+                    if ( "${env.JOB_NAME}".endsWith("-repository-build") ) {
+                        env.BUILD_COMMAND = "repository"
+                        env.HARMONIA_SCRIPT = "cryo.sh"
+                        parent_jobname = "ci-cryo"
+                        dumpParameters("${env.WORKSPACE}/cryo-params.sh")
+                    } else if ( "${env.JOB_NAME}".endsWith("-build") ) {
+                        env.BUILD_COMMAND = "build"
+                        env.HARMONIA_SCRIPT = "eap-job.sh"
+                        parent_jobname = "${env.JOB_NAME}".replace("-build","-repository-build")
+                    } else if ( "${env.JOB_NAME}".endsWith("-testsuite") ) {
+                        env.BUILD_COMMAND = "testsuite"
+                        env.HARMONIA_SCRIPT = "eap-job.sh"
+                        parent_jobname = "${env.JOB_NAME}".replace("-testsuite","-build")
+                    } else {
+                        currentBuild.result = 'ABORTED'
+                        error("Invalid JOB_NAME: ${env.JOB_NAME}, can't determine BUILD_COMMAND (missing -repository-build, -build or -testsuite suffix). Abort.")
+                    }
+                    assert ! "".equals(parent_jobname)
+                    echo "BUILD_COMMAND:[${env.BUILD_COMMAND}]"
                     env.BUILD_SCRIPT = "${env.WORKSPACE}/hera/build-wrapper.sh"
-                    env.HARMONIA_SCRIPT = "cryo.sh"
-                    def lastSuccessfulBuildId = lookupLastSuccessfulBuildId("ci-cryo")
+                    def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
                     assert lastSuccessfulBuildId.isNumber()
-                    env.PARENT_JOB_VOLUME = "/home/jenkins/jobs/ci-cryo/builds/${lastSuccessfulBuildId}/archive"
+                    env.PARENT_JOB_VOLUME = "/home/jenkins/jobs/${parent_jobname}/builds/${lastSuccessfulBuildId}/archive"
                     echo "Parent job workspace volume: ${env.PARENT_JOB_VOLUME}"
-                    dumpParameters("${env.WORKSPACE}/cryo-params.sh")
                 }
                 // Start container
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
             }
         }
-        stage ('Build') {
+        stage ('Repository') {
+            when { expression { env.BUILD_COMMAND == 'repository' } }
             steps {
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
                 archiveArtifacts artifacts: 'workdir/*.tar.gz', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                 findText(textFinders: [
                     textFinder(regexp: ".*CRYO.*SUCCESS.*(Dry run complete|Push future).*", alsoCheckConsoleOutput: true, buildResult: 'SUCCESS', changeCondition: 'MATCH_FOUND')
                 ])
+                script {
+                    env.BUILD_JOB_NAME = "${env.JOB_NAME}".replaceAll("-repository-build","-build")
+                    try {
+                        build wait: false, job: "${env.BUILD_JOB_NAME}"
+                    } catch (err) {
+                        echo "[NOTICE] No build job: '${env.BUILD_JOB_NAME}' associated to this job, no job triggered"
+                    }
+                }
+            }
+        }
+        stage ('Build') {
+            when { expression { env.BUILD_COMMAND == 'build' } }
+            steps {
+                sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
+                archiveArtifacts artifacts: '**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
+                findText(textFinders: [
+                    textFinder(regexp: /.INFO. BUILD FAILURE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
+                    textFinder(regexp: /.INFO. BUILD ERROR/, alsoCheckConsoleOutput: true, buildResult: 'FAILURE', changeCondition: 'MATCH_FOUND')
+                ])
+                script {
+                    env.TESTSUITE_JOB_NAME = "${env.JOB_NAME}".replaceAll("-build","-testsuite")
+                    try {
+                        build wait: false, job: "${env.TESTSUITE_JOB_NAME}"
+                    } catch (err) {
+                        echo "[NOTICE] No testsuite '${env.TESTSUITE_JOB_NAME}' associated to this job, no job triggered"
+                    }
+                }
+            }
+        }
+        stage ('TestSuite') {
+            when { expression { env.BUILD_COMMAND == 'testsuite' } }
+            steps {
+                script {
+                  try {
+                    sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
+                  } catch (err) {
+                    echo "Error during build ${err}"
+                  }
+                  junit "**/target/surefire-reports/*.xml"
+                  findText(textFinders: [
+                      textFinder(regexp: /.INFO. BUILD FAILURE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
+                      textFinder(regexp: /.INFO. BUILD ERROR/, alsoCheckConsoleOutput: true, buildResult: 'FAILURE', changeCondition: 'MATCH_FOUND')
+                  ])
+                }
             }
         }
     }
