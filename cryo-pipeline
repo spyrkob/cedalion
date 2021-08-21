@@ -30,7 +30,7 @@ pipeline {
             steps {
                 cleanWs()
                 dir('hera') {
-                  git branch: 'set-358_mount_ssh', url: 'https://github.com/gaol/hera.git'
+                  git branch: 'set-358_copy_artifacts', url: 'https://github.com/gaol/hera.git'
                 }
                 dir('harmonia') {
                   git branch: 'cryo', url: 'https://github.com/gaol/harmonia.git'
@@ -59,6 +59,7 @@ pipeline {
                     } else if ( "${env.JOB_NAME}".endsWith("-build") ) {
                         env.BUILD_COMMAND = "build"
                         env.HARMONIA_SCRIPT = "eap-job.sh"
+                        env.COPY_ARTIFACTS = "true"
                         parent_jobname = "${env.JOB_NAME}".replace("-build","-repository-build")
                     } else if ( "${env.JOB_NAME}".endsWith("-testsuite") ) {
                         env.BUILD_COMMAND = "testsuite"
