@@ -30,20 +30,21 @@ pipeline {
             steps {
                 cleanWs()
                 dir('hera') {
-                  git branch: 'set-358_copy_artifacts', url: 'https://github.com/gaol/hera.git'
+                  git 'https://github.com/jboss-set/hera.git'
                 }
                 dir('harmonia') {
-                  git branch: 'cryo', url: 'https://github.com/gaol/harmonia.git'
+                  git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git'
                 }
                 sh "mkdir -p workdir"
                 script {
-                    // warning, GIT_BRANCH var alreads points to pipeline's branch
+                    // warning, GIT_BRANCH var already points to pipeline's branch
                     if ( env.GIT_REPOSITORY_BRANCH == null || "".equals("${env.GIT_REPOSITORY_BRANCH}") ) {
                       env.GIT_REPOSITORY_BRANCH = "master"
                     }
                     echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
                     env.BUILD_COMMAND = ""
                     def parent_jobname = ""
+                    env.TRIGGER_JOB_NAME = ""
                     if ( "${env.JOB_NAME}".endsWith("-repository-build") ) {
                         dir('workdir') {
                           git url: "${env.GIT_REPOSITORY_URL}",
@@ -52,15 +53,17 @@ pipeline {
                         dir('auxilia') {
                           git 'https://github.com/jboss-set/auxilia.git'
                         }
-                        env.BUILD_COMMAND = "repository"
+                        env.BUILD_COMMAND = "cryo"
                         env.HARMONIA_SCRIPT = "cryo.sh"
                         parent_jobname = "ci-cryo"
                         dumpParameters("${env.WORKSPACE}/cryo-params.sh")
+                        env.TRIGGER_JOB_NAME = "${env.JOB_NAME}".replaceAll("-repository-build","-build")
                     } else if ( "${env.JOB_NAME}".endsWith("-build") ) {
                         env.BUILD_COMMAND = "build"
                         env.HARMONIA_SCRIPT = "eap-job.sh"
                         env.COPY_ARTIFACTS = "true"
                         parent_jobname = "${env.JOB_NAME}".replace("-build","-repository-build")
+                        env.TRIGGER_JOB_NAME = "${env.JOB_NAME}".replaceAll("-build","-testsuite")
                     } else if ( "${env.JOB_NAME}".endsWith("-testsuite") ) {
                         env.BUILD_COMMAND = "testsuite"
                         env.HARMONIA_SCRIPT = "eap-job.sh"
@@ -81,25 +84,17 @@ pipeline {
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
             }
         }
-        stage ('Repository') {
-            when { expression { env.BUILD_COMMAND == 'repository' } }
+        stage ('Cryo') {
+            when { expression { env.BUILD_COMMAND == 'cryo' } }
             steps {
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
                 archiveArtifacts artifacts: '**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                 findText(textFinders: [
                     textFinder(regexp: ".*CRYO.*SUCCESS.*(Dry run complete|Push future).*", alsoCheckConsoleOutput: true, buildResult: 'SUCCESS', changeCondition: 'MATCH_FOUND')
                 ])
-                script {
-                    env.BUILD_JOB_NAME = "${env.JOB_NAME}".replaceAll("-repository-build","-build")
-                    try {
-                        build wait: false, job: "${env.BUILD_JOB_NAME}"
-                    } catch (err) {
-                        echo "[NOTICE] No build job: '${env.BUILD_JOB_NAME}' associated to this job, no job triggered"
-                    }
-                }
             }
         }
-        stage ('Build') {
+        stage ('EAP Build') {
             when { expression { env.BUILD_COMMAND == 'build' } }
             steps {
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
@@ -108,17 +103,9 @@ pipeline {
                     textFinder(regexp: /.INFO. BUILD FAILURE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
                     textFinder(regexp: /.INFO. BUILD ERROR/, alsoCheckConsoleOutput: true, buildResult: 'FAILURE', changeCondition: 'MATCH_FOUND')
                 ])
-                script {
-                    env.TESTSUITE_JOB_NAME = "${env.JOB_NAME}".replaceAll("-build","-testsuite")
-                    try {
-                        build wait: false, job: "${env.TESTSUITE_JOB_NAME}"
-                    } catch (err) {
-                        echo "[NOTICE] No testsuite '${env.TESTSUITE_JOB_NAME}' associated to this job, no job triggered"
-                    }
-                }
             }
         }
-        stage ('TestSuite') {
+        stage ('EAP TestSuite') {
             when { expression { env.BUILD_COMMAND == 'testsuite' } }
             steps {
                 script {
@@ -144,6 +131,17 @@ pipeline {
               } catch (err) {
                   echo "Error while deleting container: ${err}"
               }
+            }
+        }
+        success {
+            script {
+                if ( "" != env.TRIGGER_JOB_NAME ) {
+                    try {
+                        build wait: false, job: "${env.TRIGGER_JOB_NAME}"
+                    } catch (err) {
+                        echo "[NOTICE] No Job: '${env.TRIGGER_JOB_NAME}' associated to this job, no job triggered"
+                    }
+                }
             }
         }
         failure {
