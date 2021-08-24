@@ -30,10 +30,10 @@ pipeline {
             steps {
                 cleanWs()
                 dir('hera') {
-                  git 'https://github.com/jboss-set/hera.git'
+                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
                 dir('harmonia') {
-                  git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git'
+                  git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
                 }
                 sh "mkdir -p workdir"
                 script {
@@ -51,7 +51,7 @@ pipeline {
                               branch: "${env.GIT_REPOSITORY_BRANCH}"
                         }
                         dir('auxilia') {
-                          git 'https://github.com/jboss-set/auxilia.git'
+                          git url: 'https://github.com/jboss-set/auxilia.git', poll: false, changelog: false
                         }
                         env.BUILD_COMMAND = "cryo"
                         env.HARMONIA_SCRIPT = "cryo.sh"
