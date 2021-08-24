@@ -20,7 +20,7 @@ pipeline {
                 }
 
                 dir('hera') {
-                  git 'https://github.com/jboss-set/hera.git'
+                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
 
                 dir('workdir') {
