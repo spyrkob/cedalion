@@ -70,8 +70,13 @@ pipeline {
                     }
                     env.BUILD_SCRIPT = "${env.WORKSPACE}/hera/build-wrapper.sh"
                     if ( "${env.BUILD_COMMAND}".startsWith("testsuite") ) {
-                        def parent_jobname = "${env.JOB_NAME}".replace("-testsuite","-build")
-                        assert ! "".equals(parent_jobname)
+                        def parent_jobname = ""
+                        if ( env.PARENT_JOBNAME && "${env.PARENT_JOBNAME}" != "") {
+                          parent_jobname = env.PARENT_JOBNAME
+                        } else {
+                          parent_jobname = "${env.JOB_NAME}".replace("-testsuite","-build")
+                          assert ! "".equals(parent_jobname)
+                        }
                         def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
                         assert lastSuccessfulBuildId.isNumber()
                         env.PARENT_JOB_VOLUME = "/home/jenkins/jobs/${parent_jobname}/builds/${lastSuccessfulBuildId}/archive"
