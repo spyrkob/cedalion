@@ -1,0 +1,174 @@
+
+MAIL_RECIPIENTS = "null@null.nu"
+LABEL = "master"
+JOBDSL_REMOVE_MISSING = env.JOB_CONFIGURATOR_JOBDSL_REMOVE_MISSING ? Boolean.valueOf(env.JOB_CONFIGURATOR_JOBDSL_REMOVE_MISSING) : false
+
+// Setting defaults for instances that consume jenkinsfile with the feature before reapplying the casc that do not yet set the parameters
+JOBDSL_INCLUDE = ~/.*/
+
+JOBDSL_REMOVE_MISSING_ACTION = Boolean.valueOf(JOBDSL_REMOVE_MISSING) ? 'DELETE' : 'IGNORE'
+
+node(LABEL) {
+    try {
+        checkoutDeclarationRepo()
+
+        runJobDsl()
+        
+        processResult(null)
+    } catch (Exception ex) {
+        processResult(ex)
+    }
+}
+
+private processResult(ex) {
+    def result = currentBuild.result
+    if (ex) {
+        result = ex.getClass().getName() == 'org.jenkinsci.plugins.workflow.steps.FlowInterruptedException' ? "ABORTED" : "FAILURE"
+    }
+
+    if (result in ["UNSTABLE", "FAILURE", "ABORTED"] && MAIL_RECIPIENTS != "") {
+            echo "Skipping mail notification as this is a development build"
+            // mail to: MAIL_RECIPIENTS, subject: "${env.JOB_NAME}#${env.BUILD_NUMBER} ${result} on ${env.JENKINS_URL}", body: env.BUILD_URL
+    }
+
+    if (ex) throw ex
+}
+
+private runJobDsl() {
+    echo "Load job configurations"
+
+    JOB_DSL_LIB = fileExists("job-dsl-lib") ? "job-dsl-lib" : ""
+
+    FILE_TEMPLATES = [:]
+    for (f in findFiles(glob: 'templates/*.groovy')) {
+        String name = f.getName().replaceAll('.groovy$', '')
+        FILE_TEMPLATES.put(name, readFile("templates/${f.getName()}"))
+    }
+    def files = null
+    dir('jobs') {
+        files = findFiles(glob: '')
+    }
+    for (o in files) {
+        String name = o.getName()
+        if (o.isDirectory()) {
+            directoryHandler(name, "")
+        } else {
+            configurationHandler(name, "")
+        }
+    }
+
+    if (JOBDSL_REMOVE_MISSING_ACTION == 'DELETE') {
+        echo "INFO: Removing orphans..."
+        jobDsl scriptText: "//", sandbox: true, removedJobAction: JOBDSL_REMOVE_MISSING_ACTION, removedViewAction: JOBDSL_REMOVE_MISSING_ACTION, removedConfigFilesAction: JOBDSL_REMOVE_MISSING_ACTION
+    }
+}
+
+private void checkoutDeclarationRepo() {
+    sh "cd '${WORKSPACE}/..'; rm -rf '${WORKSPACE}'; mkdir '${WORKSPACE}'; cd '${WORKSPACE}'"
+    echo "Reading config from ${JOBS_DECLARATION_REPO}"
+    // Use the explicit scm invocation as both `git` and `checkout` steps are so oversimplified, one can not enforce
+    // branch to build reliably: https://support.cloudbees.com/hc/en-us/articles/115003945572-Pipeline-Build-with-git-step-on-a-specific-branch-is-triggered-by-a-different-branch
+    sh "git clone $JOBS_DECLARATION_REPO . --branch $JOBS_DECLARATION_REPO_BRANCH --single-branch"
+}
+
+def directoryHandler(String directory, String folderPath) {
+    def location = "jobs" + "/" + folderPath + "/" + directory
+
+    if (folderPath.isEmpty()) {
+        folderPath = directory
+    } else {
+        folderPath = folderPath + "/" + directory
+    }
+
+    String folderScript
+    if (fileExists(location + '/_FOLDER.groovy')) {
+        echo "configuring custom folder $folderPath"
+        folderScript = readFile(location + "/_FOLDER.groovy")
+    } else {
+        echo "configuring default folder $folderPath"
+        folderScript = FILE_TEMPLATES.getOrDefault('_FOLDER', """
+                   folder(FOLDER_PATH) {
+                       description('')
+                   }
+            """)
+    }
+
+    invokeJobDsl(folderScript, [
+            FOLDER_PATH: folderPath,
+            FOLDER_NAME: directory
+    ])
+
+    def subfiles = null
+    // dir(directory) { // We need to be changing the directory to walk the hierarchy as findFiles can not locate subdirectories when glob is used
+    dir(location) {
+        subfiles = findFiles glob: ''
+    }
+    for (o in subfiles) {
+        String name = o.getName()
+        if (o.isDirectory()) {
+            directoryHandler(name, folderPath)
+        } else {
+            configurationHandler(name, folderPath)
+        }
+    }
+}
+
+def configurationHandler(String fileName, String folderPath) {
+    def location = "jobs" + "/" + folderPath
+    def customJobScriptPath = location + "/" + fileName
+    if (!(customJobScriptPath =~ JOBDSL_INCLUDE)) {
+        echo "WARNING: path ${customJobScriptPath} does not match load pattern."
+    } else if (fileName != "_FOLDER.groovy") {
+        if (fileName.endsWith(".groovy")) {
+            def jobName = fileName.substring(0, fileName.length() - ".groovy".length())
+            def itemPath = folderPath + "/" + jobName
+            echo "configuring custom configuration for job " + itemPath
+            String customJobScript = readFile (customJobScriptPath)
+            invokeJobDsl(customJobScript, [
+                    ITEM_NAME: jobName,
+                    ITEM_PATH: itemPath,
+                    FOLDER_PATH: folderPath
+            ])
+        } else {
+            if (!fileName.contains(".jenkinsfile")) {
+                echo "WARNING: $fileName is not a .groovy file nor a .jenkinsfile"
+                return
+            }
+            def template = fileName.split("\\.")[1]
+            if (fileName.split("\\.").length < 3 ) {
+                echo "WARNING: File $fileName does not refers to any template, the form should be <name>.<TEMPLATE>.jenkinsfile"
+            }
+            if (!FILE_TEMPLATES.containsKey(template)) {
+                echo "WARNING: $template does not exists"
+                return
+            }
+            String templateScript = FILE_TEMPLATES.get(template)
+            String name = fileName.split("\\.")[0]
+            String itemPath = folderPath + "/" + name
+            String groovyFileName = name + ".groovy"
+            if (!fileExists(location + "/" + groovyFileName)) {
+                echo "configuring default configuration for job " + itemPath
+                def scriptText = readFile (customJobScriptPath)
+                if (templateScript != null) {
+                    invokeJobDsl(templateScript, [
+                            ITEM_NAME: name,
+                            ITEM_PATH: itemPath,
+                            // TODO: FOLDER_PATH is missing
+                            PIPELINE_SCRIPT: scriptText,
+                    ])
+                } else {
+                    echo "WARNING: There is no default configuration for jenkinsfile without job definition, skipping " + folderPath + "/" + fileName
+                }
+            }
+        }
+        echo "configuring ${fileName}"
+    }
+}
+
+def invokeJobDsl(String script, def params) {
+    if (!JOB_DSL_LIB.isEmpty()) {
+        jobDsl scriptText: script, additionalParameters: params, sandbox: true, additionalClasspath: JOB_DSL_LIB
+    } else {
+        jobDsl scriptText: script, additionalParameters: params, sandbox: true
+    }
+}
