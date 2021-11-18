@@ -12,7 +12,7 @@ class Builder {
         }
 
         factory.with {
-            pipelineJob(jobName) {
+            pipelineJob(jobName + '-build') {
 
                 definition {
                     cps {
