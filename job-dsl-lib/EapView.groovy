@@ -15,17 +15,6 @@ static jobList(factory, String viewName, String jobRegex) {
                 lastDuration()
                 buildButton()
             }
-            leftPortlets {
-                testStatisticsChart {
-                    displayName ("Test Statistics Chart")
-                }
-            }
-            rightPortlets {
-                latestBuilds {
-                    name ("Latest builds")
-                    numBuilds(10)
-                }
-            }
         }
     }
 }
