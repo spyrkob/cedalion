@@ -51,6 +51,10 @@ class Builder {
                     name ("HARMONIA_SCRIPT")
                     defaultValue("eap-job/olympus.sh")
                     }
+                    stringParam {
+                      name ("MAVEN_OPTS")
+                      defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2")
+                    }
                 }
             }
         }
