@@ -4,6 +4,7 @@ class Builder {
 
     String jobName
     String branch
+    String schedule = 'H/10 * * * *'
 
     def build(factory) {
 
@@ -25,6 +26,9 @@ class Builder {
                     numToKeep(10)
                     artifactDaysToKeep(60)
                     artifactNumToKeep(5)
+                }
+                triggers {
+                    scm (schedule)
                 }
                 parameters {
                     stringParam {
