@@ -16,6 +16,10 @@ pipelineJob('ansible-ci') {
       name ("BUILD_PODMAN_IMAGE")
       defaultValue("localhost/ansible")
     }
+    stringParam {
+      name ("RELEASE_VERSION")
+      defaultValue("")
+    }
   }
   definition {
     cps {
