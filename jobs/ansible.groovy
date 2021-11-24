@@ -17,7 +17,7 @@ pipelineJob('ansible-ci') {
       defaultValue("localhost/ansible")
     }
     stringParam {
-      name ("RELEASE_VERSION")
+      name ("VERSION")
       defaultValue("")
     }
   }
