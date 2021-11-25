@@ -24,9 +24,7 @@ pipeline {
                 }
 
                 dir('workdir') {
-                  git credentialsId: 'ansible-git-repository',
-                      url: "${env.INTERNAL_GIT_REPOSITORY_URL}/ansible-middleware/redhat-csp-download.git",
-                      branch: "${env.GIT_REPOSITORY_BRANCH}"
+                  git credentialsId: 'ansible-git-repository', url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
                 }
 
                 script {
