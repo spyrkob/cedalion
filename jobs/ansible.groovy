@@ -5,6 +5,10 @@ pipelineJob('ansible-ci') {
       defaultValue("build-collection.sh")
     }
     stringParam {
+      name ("GIT_REPOSITORY_URL")
+      defaultValue("${env.INTERNAL_GIT_REPOSITORY_URL}/ansible-middleware/redhat-csp-download.git")
+    }
+    stringParam {
       name ("GIT_REPOSITORY_BRANCH")
       defaultValue("main")
     }
