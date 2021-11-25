@@ -10,6 +10,7 @@ pipeline {
             steps {
                 cleanWs()
                 script {
+                    echo "INTERNAL_GIT_REPOSITORY_URL:${env.INTERNAL_GIT_REPOSITORY_URL}"
                     echo "JOB_NAME:[${env.JOB_NAME}]"
                     echo "SCRIPT:[${env.PATH_TO_SCRIPT}]"
                     // warning, GIT_BRANCH var alreads points to pipeline's branch
@@ -24,7 +25,7 @@ pipeline {
                 }
 
                 dir('workdir') {
-                  git credentialsId: 'ansible-git-repository', url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
+                  git credentialsId: 'ansible-git-repository', url: "${env.INTERNAL_GIT_REPOSITORY_URL}/ansible-middleware/redhat-csp-download.git", branch: "${env.GIT_REPOSITORY_BRANCH}"
                 }
 
                 script {
