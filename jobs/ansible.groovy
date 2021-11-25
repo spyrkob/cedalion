@@ -5,10 +5,6 @@ pipelineJob('ansible-ci') {
       defaultValue("build-collection.sh")
     }
     stringParam {
-      name ("GIT_REPOSITORY_URL")
-      defaultValue("https://github.com/rpelisse/redhat-csp-download.git")
-    }
-    stringParam {
       name ("GIT_REPOSITORY_BRANCH")
       defaultValue("main")
     }
@@ -23,7 +19,7 @@ pipelineJob('ansible-ci') {
   }
   definition {
     cps {
-        script(readFileFromWorkspace('pipelines/bash-pipeline'))
+        script(readFileFromWorkspace('pipelines/ansible-pipeline'))
         sandbox(true)
     }
   }
