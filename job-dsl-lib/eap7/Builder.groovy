@@ -5,6 +5,12 @@ class Builder {
     String jobName
     String branch
     String schedule = 'H/10 * * * *'
+    String parentJobname = ''
+
+    def buildAndTest(factory) {
+        build(factory)
+        test(factory)
+    }
 
     def build(factory) {
 
@@ -62,7 +68,9 @@ class Builder {
                 }
             }
         }
+    }
 
+    def test(factory) {
         factory.with {
             pipelineJob(jobName + '-testsuite') {
 
@@ -106,6 +114,10 @@ class Builder {
                     stringParam {
                       name ("MAVEN_OPTS")
                       defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2")
+                    }
+                    stringParam {
+                        name("PARENT_JOBNAME")
+                        defaultValue(parentJobname)
                     }
                 }
             }
