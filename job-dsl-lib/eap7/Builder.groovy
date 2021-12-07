@@ -6,6 +6,9 @@ class Builder {
     String branch
     String schedule = 'H/10 * * * *'
     String parentJobname = ''
+    String mavenSettingsXml = '/opt/tools/settings.xml'
+    String harmoniaScript = 'eap-job/olympus.sh'
+    String gitRepositoryUrl = 'git@github.com:jbossas/jboss-eap7.git'
 
     def buildAndTest(factory) {
         build(factory)
@@ -38,8 +41,8 @@ class Builder {
                 }
                 parameters {
                     stringParam {
-                    name ("GIT_REPOSITORY_URL")
-                    defaultValue("git@github.com:jbossas/jboss-eap7.git")
+                        name ("GIT_REPOSITORY_URL")
+                        defaultValue(gitRepositoryUrl)
                     }
                     stringParam {
                     name ("GIT_REPOSITORY_BRANCH")
@@ -55,11 +58,11 @@ class Builder {
                     }
                     stringParam {
                     name ("MAVEN_SETTINGS_XML")
-                    defaultValue("/opt/tools/settings.xml")
+                    defaultValue(mavenSettingsXml)
                     }
                     stringParam {
                     name ("HARMONIA_SCRIPT")
-                    defaultValue("eap-job/olympus.sh")
+                    defaultValue(harmoniaScript)
                     }
                     stringParam {
                       name ("MAVEN_OPTS")
@@ -88,8 +91,8 @@ class Builder {
                 }
                 parameters {
                     stringParam {
-                    name ("GIT_REPOSITORY_URL")
-                    defaultValue("git@github.com:jbossas/jboss-eap7.git")
+                        name ("GIT_REPOSITORY_URL")
+                        defaultValue(gitRepositoryUrl)
                     }
                     stringParam {
                     name ("GIT_REPOSITORY_BRANCH")
@@ -104,12 +107,12 @@ class Builder {
                     defaultValue("/opt/oracle/java")
                     }
                     stringParam {
-                    name ("MAVEN_SETTINGS_XML")
-                    defaultValue("/opt/tools/settings.xml")
+                        name ("MAVEN_SETTINGS_XML")
+                        defaultValue(mavenSettingsXml)
                     }
                     stringParam {
-                    name ("HARMONIA_SCRIPT")
-                    defaultValue("eap-job/olympus.sh")
+                        name ("HARMONIA_SCRIPT")
+                        defaultValue(harmoniaScript)
                     }
                     stringParam {
                       name ("MAVEN_OPTS")

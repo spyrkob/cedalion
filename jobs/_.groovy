@@ -15,3 +15,10 @@ for (version in ["7.2.x", "7.1.x", "7.0.x"]) {
 
     EapView.jobList(this, 'eap-' + version, 'eap-' + version.replace('x','*'))
 }
+
+new eap7.Builder(branch:'6.4.x',
+                 mavenSettingsXml:'/opt/tools/settings-64.xml',
+                 harmoniaScript: 'eap-job-64.sh',
+                 gitRepositoryUrl: "git@github.com:jbossas/jboss-eap.git"
+                ).buildAndTest(this)
+EapView.jobList(this, 'eap-6.4.x', 'eap-6.4.*')
