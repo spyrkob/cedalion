@@ -4,11 +4,16 @@ class MvnBuilder {
 
     String jobName
     String repoName
+    String repoUrl
     String schedule = 'H/10 * * * *'
+    String mavenGoals = '' // defaults to clean install in hera
 
     def build(factory) {
         if (jobName == null) {
             jobName = 'ci-' + repoName
+        }
+        if (repoUrl == null) {
+            repoUrl = 'https://github.com/jboss-set/' + repoName
         }
         factory.with {
             pipelineJob(jobName) {
@@ -32,7 +37,7 @@ class MvnBuilder {
                 parameters {
                     stringParam {
                         name ("GIT_REPOSITORY_URL")
-                        defaultValue('https://github.com/jboss-set/' + repoName + '.git')
+                        defaultValue(repoUrl)
                     }
                     stringParam {
                         name ("GIT_REPOSITORY_BRANCH")
@@ -53,6 +58,10 @@ class MvnBuilder {
                     stringParam {
                         name ("MAVEN_OPTS")
                         defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2  -Dnorpm")
+                    }
+                    stringParam {
+                        name ("MAVEN_GOALS")
+                        defaultValue(mavenGoals)
                     }
                 }
             }
