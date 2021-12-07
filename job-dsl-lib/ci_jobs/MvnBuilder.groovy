@@ -1,11 +1,13 @@
 package ci_jobs
 
+import util.Constants
+
 class MvnBuilder {
 
     String jobName
     String repoName
     String repoUrl
-    String schedule = 'H/10 * * * *'
+    String schedule = Constants.DEFAULT_SCHEDULE
     String mavenGoals = '' // defaults to clean install in hera
 
     def build(factory) {

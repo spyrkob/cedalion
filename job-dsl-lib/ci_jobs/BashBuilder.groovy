@@ -1,11 +1,13 @@
 package ci_jobs
 
+import util.Constants
+
 class BashBuilder {
 
     String jobName
     String repoName
     String branch
-    String schedule = 'H/10 * * * *'
+    String schedule = Constants.DEFAULT_SCHEDULE
 
     def build(factory) {
         if (jobName == null) {

@@ -1,3 +1,5 @@
+import util.Constants
+
 pipelineJob(ITEM_NAME) {
 
     definition {
@@ -18,7 +20,7 @@ pipelineJob(ITEM_NAME) {
         artifactNumToKeep(5)
     }
     triggers {
-        scm ('H/10 * * * *')
+        scm (Constants.DEFAULT_SCHEDULE)
         cron('@daily')
     }
     parameters {

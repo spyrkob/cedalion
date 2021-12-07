@@ -1,10 +1,12 @@
 package eap7
 
+import util.Constants
+
 class Builder {
 
     String jobName
     String branch
-    String schedule = 'H/10 * * * *'
+    String schedule = Constants.DEFAULT_SCHEDULE
     String parentJobname = ''
     String mavenSettingsXml = '/opt/tools/settings.xml'
     String harmoniaScript = 'eap-job/olympus.sh'
