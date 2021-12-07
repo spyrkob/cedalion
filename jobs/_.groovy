@@ -22,3 +22,9 @@ new eap7.Builder(branch:'6.4.x',
                  gitRepositoryUrl: "git@github.com:jbossas/jboss-eap.git"
                 ).buildAndTest(this)
 EapView.jobList(this, 'eap-6.4.x', 'eap-6.4.*')
+
+new eap7.Builder(branch:'main',
+                 jobName: 'wildfly',
+                 gitRepositoryUrl: "git@github.com:wildfly/wildfly.git"
+                ).buildAndTest(this)
+EapView.jobList(this, 'wildfly', 'wildfly.*')
