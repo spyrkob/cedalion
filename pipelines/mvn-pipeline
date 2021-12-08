@@ -9,6 +9,13 @@ pipeline {
         stage('Prep') {
             steps {
                 //cleanWs()
+                script {
+                  if ( env.HERA_GIT_BRANCH == null || "".equals("${env.HERA_GIT_BRANCH}") ) {
+                     env.HERA_GIT_BRANCH = "master"
+                  }
+                  else
+                    echo "HERA_GIT_BRANCH:[${env.HERA_GIT_BRANCH}]"
+                }
                 dir('hera') {
                   git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
