@@ -1,12 +1,11 @@
 package eap7
 
-import util.Constants
+import util.JobSharedUtils
 
 class Builder {
 
     String jobName
     String branch
-    String schedule = Constants.DEFAULT_SCHEDULE
     String mavenSettingsXml = '/opt/tools/settings.xml'
     String harmoniaScript = 'eap-job/olympus.sh'
 
@@ -16,8 +15,8 @@ class Builder {
         }
 
         repoBuild(factory)
-        build(factory)
-        test(factory)
+        buildChain(factory, jobName + '-build')
+        buildChain(factory, jobName + '-testsuite')
     }
 
     def repoBuild(factory) {
@@ -26,49 +25,20 @@ class Builder {
 
                 definition {
                     cps {
-                    script(readFileFromWorkspace('pipelines/cryo-pipeline'))
-                    sandbox()
+                        script(readFileFromWorkspace('pipelines/cryo-pipeline'))
+                        sandbox()
                     }
                 }
-                logRotator {
-                    daysToKeep(30)
-                    numToKeep(10)
-                    artifactDaysToKeep(60)
-                    artifactNumToKeep(5)
-                }
+                JobSharedUtils.defaultBuildDiscarder(delegate)
                 properties {
-                    disableConcurrentBuilds {
-                        abortPrevious(false)
-                    }
+                    JobSharedUtils.doDisableConcurrentBuilds(delegate)
                 }
                 triggers {
-                    scm (schedule)
+                    scm(JobSharedUtils.DEFAULT_SCHEDULE)
                 }
                 parameters {
-                    stringParam {
-                        name ("GIT_REPOSITORY_URL")
-                        defaultValue('git@github.com:jbossas/jboss-eap7.git')
-                    }
-                    stringParam {
-                        name ("GIT_REPOSITORY_BRANCH")
-                        defaultValue(branch)
-                    }
-                    stringParam {
-                        name ("MAVEN_HOME")
-                        defaultValue("/opt/apache/maven")
-                    }
-                    stringParam {
-                        name ("JAVA_HOME")
-                        defaultValue("/opt/oracle/java")
-                    }
-                    stringParam {
-                        name ("MAVEN_SETTINGS_XML")
-                        defaultValue(mavenSettingsXml)
-                    }
-                    stringParam {
-                        name ("MAVEN_OPTS")
-                        defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2")
-                    }
+                    JobSharedUtils.gitParameters(delegate, 'git@github.com:jbossas/jboss-eap7.git', branch)
+                    JobSharedUtils.mavenParameters(params: params, mavenSettingsXml: mavenSettingsXml)
                     stringParam {
                         name ("INCLUDE_LIST")
                         defaultValue('')
@@ -109,9 +79,9 @@ class Builder {
         }
     }
 
-    def build(factory) {
+    def buildChain(factory, _jobName) {
         factory.with {
-            pipelineJob(jobName + '-build') {
+            pipelineJob(_jobName) {
 
                 definition {
                     cps {
@@ -119,77 +89,12 @@ class Builder {
                         sandbox()
                     }
                 }
-                logRotator {
-                    daysToKeep(30)
-                    numToKeep(10)
-                    artifactDaysToKeep(60)
-                    artifactNumToKeep(5)
-                }
+                JobSharedUtils.defaultBuildDiscarder(delegate)
                 properties {
-                    disableConcurrentBuilds {
-                        abortPrevious(false)
-                    }
+                    JobSharedUtils.doDisableConcurrentBuilds(delegate)
                 }
                 parameters {
-                    stringParam {
-                        name ("MAVEN_HOME")
-                        defaultValue("/opt/apache/maven")
-                    }
-                    stringParam {
-                        name ("JAVA_HOME")
-                        defaultValue("/opt/oracle/java")
-                    }
-                    stringParam {
-                        name ("MAVEN_SETTINGS_XML")
-                        defaultValue(mavenSettingsXml)
-                    }
-                    stringParam {
-                        name ("MAVEN_OPTS")
-                        defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2")
-                    }
-                }
-            }
-        }
-    }
-
-    def test(factory) {
-        factory.with {
-            pipelineJob(jobName + '-testsuite') {
-
-                definition {
-                    cps {
-                        script(readFileFromWorkspace('pipelines/cryo-pipeline'))
-                        sandbox()
-                    }
-                }
-                logRotator {
-                    daysToKeep(30)
-                    numToKeep(10)
-                    artifactDaysToKeep(60)
-                    artifactNumToKeep(5)
-                }
-                properties {
-                    disableConcurrentBuilds {
-                        abortPrevious(false)
-                    }
-                }
-                parameters {
-                    stringParam {
-                        name ("MAVEN_HOME")
-                        defaultValue("/opt/apache/maven")
-                    }
-                    stringParam {
-                        name ("JAVA_HOME")
-                        defaultValue("/opt/oracle/java")
-                    }
-                    stringParam {
-                        name ("MAVEN_SETTINGS_XML")
-                        defaultValue(mavenSettingsXml)
-                    }
-                    stringParam {
-                        name ("MAVEN_OPTS")
-                        defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2")
-                    }
+                    JobSharedUtils.mavenParameters(params: params, mavenSettingsXml: mavenSettingsXml)
                 }
             }
         }

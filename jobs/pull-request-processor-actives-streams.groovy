@@ -1,29 +1,24 @@
-import util.Constants
+import util.JobSharedUtils
 
 pipelineJob(ITEM_NAME) {
 
     definition {
         cps {
-        script(readFileFromWorkspace('pipelines/pr-processor-pipeline'))
-        sandbox()
+            script(readFileFromWorkspace('pipelines/pr-processor-pipeline'))
+            sandbox()
         }
     }
     properties {
-        disableConcurrentBuilds {
-            abortPrevious(false)
-        }
+        JobSharedUtils.doDisableConcurrentBuilds(delegate)
     }
-    logRotator {
-        daysToKeep(30)
-        numToKeep(10)
-        artifactDaysToKeep(60)
-        artifactNumToKeep(5)
-    }
+    JobSharedUtils.defaultBuildDiscarder(delegate)
     triggers {
-        scm (Constants.DEFAULT_SCHEDULE)
+        scm (JobSharedUtils.DEFAULT_SCHEDULE)
         cron('@daily')
     }
     parameters {
+        JobSharedUtils.mavenParameters(params: delegate)
+
         stringParam {
             name ("PULL_REQUEST_PROCESSOR_HOME")
             defaultValue('/opt/tools/pr-processor/')
@@ -31,18 +26,6 @@ pipelineJob(ITEM_NAME) {
         stringParam {
             name ("HARMONIA_SCRIPT")
             defaultValue('pr-processor.sh')
-        }
-        stringParam {
-            name ("JAVA_HOME")
-            defaultValue("/opt/oracle/java")
-        }
-        stringParam {
-            name ("MAVEN_HOME")
-            defaultValue("/opt/oracle/maven")
-        }
-        stringParam {
-            name ("MAVEN_SETTINGS_XML")
-            defaultValue('/opt/tools/settings.xml')
         }
         stringParam {
             name ("VERSION")

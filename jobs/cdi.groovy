@@ -1,3 +1,5 @@
+import util.JobSharedUtils
+
 pipelineJob(ITEM_NAME) {
 
     definition {
@@ -7,28 +9,14 @@ pipelineJob(ITEM_NAME) {
         }
     }
     properties {
-        disableConcurrentBuilds {
-            abortPrevious(false)
-        }
+        JobSharedUtils.doDisableConcurrentBuilds(delegate)
     }
-    logRotator {
-        daysToKeep(30)
-        numToKeep(10)
-        artifactDaysToKeep(60)
-        artifactNumToKeep(5)
-    }
+    JobSharedUtils.defaultBuildDiscarder(delegate)
     parameters {
+        JobSharedUtils.mavenParameters(params: delegate)
         stringParam {
             name ("HARMONIA_SCRIPT")
             defaultValue('cts/cdi.sh')
-        }
-        stringParam {
-            name ("JAVA_HOME")
-            defaultValue('/opt/oracle/java')
-        }
-        stringParam {
-            name ("MAVEN_HOME")
-            defaultValue('/opt/apache/maven')
         }
         stringParam {
             name ("build_selector")

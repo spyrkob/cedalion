@@ -1,13 +1,12 @@
 package ci_jobs
 
-import util.Constants
+import util.JobSharedUtils
 
 class BashBuilder {
 
     String jobName
     String repoName
     String branch
-    String schedule = Constants.DEFAULT_SCHEDULE
 
     def build(factory) {
         if (jobName == null) {
@@ -18,35 +17,23 @@ class BashBuilder {
 
                 definition {
                     cps {
-                    script(readFileFromWorkspace('pipelines/bash-pipeline'))
-                    sandbox()
+                        script(readFileFromWorkspace('pipelines/bash-pipeline'))
+                        sandbox()
                     }
                 }
-                logRotator {
-                    daysToKeep(30)
-                    numToKeep(10)
-                    artifactDaysToKeep(60)
-                    artifactNumToKeep(5)
-                }
+                JobSharedUtils.defaultBuildDiscarder(delegate)
                 triggers {
-                    scm (schedule)
+                    scm(JobSharedUtils.DEFAULT_SCHEDULE)
                     cron('@daily')
                 }
                 parameters {
+                    JobSharedUtils.gitParameters(delegate, 'https://github.com/jboss-set/' + repoName, branch)
                     stringParam {
-                        name ("GIT_REPOSITORY_URL")
-                        defaultValue('https://github.com/jboss-set/' + repoName + '.git')
-                    }
-                    stringParam {
-                        name ("GIT_REPOSITORY_BRANCH")
-                        defaultValue(branch)
-                    }
-                    stringParam {
-                        name ("PATH_TO_SCRIPT")
+                        name("PATH_TO_SCRIPT")
                         defaultValue("./tests/tests-suite.sh")
                     }
                     stringParam {
-                        name ("BUILD_PODMAN_IMAGE")
+                        name("BUILD_PODMAN_IMAGE")
                         defaultValue("localhost/bashomatons")
                     }
                 }

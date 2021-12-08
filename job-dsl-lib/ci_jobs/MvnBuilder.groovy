@@ -1,13 +1,12 @@
 package ci_jobs
 
-import util.Constants
+import util.JobSharedUtils
 
 class MvnBuilder {
 
     String jobName
     String repoName
     String repoUrl
-    String schedule = Constants.DEFAULT_SCHEDULE
     String mavenGoals = '' // defaults to clean install in hera
 
     def build(factory) {
@@ -22,41 +21,19 @@ class MvnBuilder {
 
                 definition {
                     cps {
-                    script(readFileFromWorkspace('pipelines/mvn-pipeline'))
-                    sandbox()
+                        script(readFileFromWorkspace('pipelines/mvn-pipeline'))
+                        sandbox()
                     }
                 }
-                logRotator {
-                    daysToKeep(30)
-                    numToKeep(10)
-                    artifactDaysToKeep(60)
-                    artifactNumToKeep(5)
-                }
+                JobSharedUtils.defaultBuildDiscarder(delegate)
                 triggers {
-                    scm (schedule)
+                    scm(JobSharedUtils.DEFAULT_SCHEDULE)
                     cron('@daily')
                 }
                 parameters {
-                    stringParam {
-                        name ("GIT_REPOSITORY_URL")
-                        defaultValue(repoUrl)
-                    }
-                    stringParam {
-                        name ("GIT_REPOSITORY_BRANCH")
-                        defaultValue('master')
-                    }
-                    stringParam {
-                        name ("MAVEN_HOME")
-                        defaultValue("/opt/apache/maven")
-                    }
-                    stringParam {
-                        name ("JAVA_HOME")
-                        defaultValue("/opt/oracle/java")
-                    }
-                    stringParam {
-                        name ("MAVEN_SETTINGS_XML")
-                        defaultValue('/opt/tools/settings.xml')
-                    }
+                    JobSharedUtils.gitParameters(delegate, repoUrl, 'master')
+                    JobSharedUtils.mavenParameters(params: delegate)
+                    // override MAVEN_OPTS to add -Dnorpm
                     stringParam {
                         name ("MAVEN_OPTS")
                         defaultValue("-Dmaven.wagon.http.ssl.insecure=true -Dhttps.protocols=TLSv1.2  -Dnorpm")
