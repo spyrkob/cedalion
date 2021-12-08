@@ -29,7 +29,7 @@ new tck.Builder(
                     name("HARMONIA_SCRIPT")
                     defaultValue('cts/appserver.sh')
                 }
-            }}
+            } }
     ).exclusiveJob(this)
 
 new tck.Builder(
