@@ -28,21 +28,3 @@ new eap7.Builder(branch:'main',
                  gitRepositoryUrl: "git@github.com:wildfly/wildfly.git"
                 ).buildAndTest(this)
 EapView.jobList(this, 'wildfly', 'wildfly.*')
-
-listView('TCK') {
-    recurse(true)
-    jobs {
-        names('atinject', 'beanvalidation', 'appserver', 'buildcts', 'cdi')
-        names('glassfishpackage', 'jaxb23', 'jaxws', 'modspackage', 'runner')
-        names('saaj', 'websocket', 'toplevel')
-    }
-    columns {
-        status()
-        weather()
-        name()
-        lastSuccess()
-        lastFailure()
-        lastDuration()
-        buildButton()
-    }
-}
