@@ -17,7 +17,10 @@ pipeline {
                     echo "HERA_GIT_BRANCH:[${env.HERA_GIT_BRANCH}]"
                 }
                 dir('hera') {
-                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
+                  git url: 'https://github.com/jboss-set/hera.git',
+                      poll: false,
+                      branch: "${env.HERA_GIT_BRANCH}",
+                      changelog: false
                 }
 
                 timeout(time: 10) {
