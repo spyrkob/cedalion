@@ -38,7 +38,7 @@ class Builder {
                 }
                 parameters {
                     JobSharedUtils.gitParameters(delegate, 'git@github.com:jbossas/jboss-eap7.git', branch)
-                    JobSharedUtils.mavenParameters(params: params, mavenSettingsXml: mavenSettingsXml)
+                    JobSharedUtils.mavenParameters(params: delegate, mavenSettingsXml: mavenSettingsXml)
                     stringParam {
                         name ("INCLUDE_LIST")
                         defaultValue('')
@@ -94,7 +94,7 @@ class Builder {
                     JobSharedUtils.doDisableConcurrentBuilds(delegate)
                 }
                 parameters {
-                    JobSharedUtils.mavenParameters(params: params, mavenSettingsXml: mavenSettingsXml)
+                    JobSharedUtils.mavenParameters(params: delegate, mavenSettingsXml: mavenSettingsXml)
                 }
             }
         }
