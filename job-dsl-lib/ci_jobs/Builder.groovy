@@ -10,7 +10,7 @@ class Builder {
     String repoUrl
     String mavenGoals = '' // defaults to clean install in hera
 
-    Builder() {
+    void validate_properties() {
         if (jobName == null) {
             jobName = 'ci-' + repoName
         }
@@ -20,6 +20,7 @@ class Builder {
     }
 
     def buildBashJob(factory) {
+        validate_properties()
         factory.with {
             pipelineJob(jobName) {
                 // for some reason readFileFromWorkspace doesn't work from within baseJob call
@@ -46,6 +47,7 @@ class Builder {
     }
 
     def buildMvnJob(factory) {
+        validate_properties()
         factory.with {
             pipelineJob(jobName) {
                 // for some reason readFileFromWorkspace doesn't work from within baseJob call
