@@ -62,17 +62,17 @@ class Builder {
                     booleanParam {
                         name ("FLIP")
                         defaultValue(true)
-                        defaultValue('Invert PRs. By default GitHub/Aphrodite return newest as first - bigger ID is first.')
+                        description('Invert PRs. By default GitHub/Aphrodite return newest as first - bigger ID is first.')
                     }
                     booleanParam {
                         name ("CHECK_STATE")
                         defaultValue(false)
-                        defaultValue('Switch on testing state of PR. By default CRYO will ignore PR metadata. If set to true, it will only use PRs that have all ACKs set(Has all acks label, usually set by PR processor).')
+                        description('Switch on testing state of PR. By default CRYO will ignore PR metadata. If set to true, it will only use PRs that have all ACKs set(Has all acks label, usually set by PR processor).')
                     }
                     booleanParam {
                         name ("FAST_LOGGING")
                         defaultValue(false)
-                        defaultValue('If turned on, CRYO wont control logging and push timestamp into long running commands.')
+                        description('If turned on, CRYO wont control logging and push timestamp into long running commands.')
                     }
                 }
             }
