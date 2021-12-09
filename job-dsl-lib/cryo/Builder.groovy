@@ -11,7 +11,7 @@ class Builder {
 
     def buildAndTest(factory) {
         if (jobName == null) {
-            jobName = 'cryo-' + branch
+            jobName = 'cryo-eap-' + branch
         }
 
         repoBuild(factory)
