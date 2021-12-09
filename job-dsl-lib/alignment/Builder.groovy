@@ -10,7 +10,7 @@ class Builder {
 
     void build(factory) {
         if (jobName == null) {
-            jobName = 'component-aligment-' + jobSuffix
+            jobName = 'component-alignment-' + jobSuffix
         }
         factory.with {
             pipelineJob(jobName) {
