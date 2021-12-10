@@ -18,7 +18,7 @@ def dumpParameters(String outputFile) {
   }
   lines = lines + "export HARMONIA_SCRIPT=\"${env.HARMONIA_SCRIPT}\"\n"
   lines = lines + "export CRYO_HARMONIA_SH=\"${env.CRYO_HARMONIA_SH}\"\n"
-  
+
   writeFile file: outputFile, text: lines
   echo "Done.."
 }
@@ -89,8 +89,10 @@ pipeline {
                     env.BUILD_SCRIPT = "${env.WORKSPACE}/hera/build-wrapper.sh"
                     def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
                     assert lastSuccessfulBuildId.isNumber()
-                    env.PARENT_JOB_VOLUME = "/home/jenkins/jobs/${parent_jobname}/builds/${lastSuccessfulBuildId}/archive"
-                    echo "Parent job workspace volume: ${env.PARENT_JOB_VOLUME}"
+                    env.PARENT_JOB_BUID_ID = "${lastSuccessfulBuildId}"
+                    echo "Parent job name: ${env.PARENT_JOB_NAME}"
+                    echo "Parent job build ID: ${env.PARENT_JOB_BUID_ID}"
+
                 }
                 // Start container
                 sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
