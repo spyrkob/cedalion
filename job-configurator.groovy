@@ -21,7 +21,7 @@ pipelineJob("job-configurator") {
    
     // Those deprecated 'triggers' are needed until fixed https://issues.jenkins.io/browse/JENKINS-61463 
     triggers {
-        scm('@daily')
+        scm('H/15 * * * *')
         hudsonStartupTrigger {
             nodeParameterName("master")
             label("master")
