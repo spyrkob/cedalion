@@ -8,4 +8,5 @@ new ansible.Builder(collectionName:'ansible_collections_jcliff').build(this)
 //   container (and thus, needs to be unique).
 new ansibleCi.Builder(projectName:'jws-ansible-playbook', moleculeBuildId: 22001).build(this)
 new ansibleCi.Builder(projectName:'wildfly', moleculeBuildId: 23001).build(this)
-EapView.jobList(this, 'Ansible Collections', 'ansible-collection-*')
+EapView.jobList(this, 'Ansible Collections', 'ansible-collection.*')
+EapView.jobList(this, 'Ansible CI', 'ansible-ci.*')
