@@ -20,11 +20,11 @@ pipeline {
                 }
 
                 dir('hera') {
-                  git branch: 'opt_mount', url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
+                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
 
                 dir('harmonia') {
-                  git branch: 'molecule', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
+                  git url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
                 }
 
                 dir('workdir') {
@@ -32,7 +32,7 @@ pipeline {
                 }
 
                 dir('olympus') {
-                  git url: 'git@github.com:rpelisse/molecule-delegate.git', branch: 'main'
+                  git url: 'git@github.com:jboss-set/eris.git', branch: 'main'
                 }
 
                 script {
