@@ -3,6 +3,7 @@ package ansibleCi
 class Builder {
 
     String projectName
+    String projectPrefix = 'ansible-ci'
     String moleculeBuildId
     String gitUrl = "https://github.com/ansible-middleware/"
     String branch
@@ -10,7 +11,7 @@ class Builder {
 
     def build(factory) {
         factory.with {
-            pipelineJob('ansible-ci-' + projectName) {
+            pipelineJob(projectPrefix + '-' + projectName) {
 
                 definition {
                     cps {
