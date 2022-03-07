@@ -31,7 +31,7 @@ pipeline {
                   git url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
                 }
 
-                dir('olympus') {
+                dir('eris') {
                   git url: 'git@github.com:jboss-set/eris.git', branch: 'main'
                 }
 
