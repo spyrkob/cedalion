@@ -14,4 +14,6 @@ new ci_jobs.Builder(repoName: 'harmonia', branch: 'olympus').buildBashJob(this)
 
 new ci_jobs.Builder(jobName: 'ci-harmonia-cci', repoName: 'harmonia', branch: 'olympus-cci').buildBashJob(this)
 
+new ci_jobs.Builder(repoName: 'maven-vbe').buildMvnJob(this)
+
 EapView.jobList(this, 'SET CI', 'ci.*')
