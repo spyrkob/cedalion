@@ -33,6 +33,10 @@ class JobSharedUtils {
             args.mavenSettingsXml = '/opt/tools/settings.xml'
         }
 
+        if (args.javaHome == null) {
+            args.javaHome = '/opt/oracle/java'
+        }
+
         args.params.with {
             stringParam {
                 name ("MAVEN_HOME")
@@ -40,7 +44,7 @@ class JobSharedUtils {
             }
             stringParam {
                 name ("JAVA_HOME")
-                defaultValue("/opt/oracle/java")
+                defaultValue(args.javaHome)
             }
             stringParam {
                 name ("MAVEN_SETTINGS_XML")
