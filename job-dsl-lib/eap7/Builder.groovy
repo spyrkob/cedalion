@@ -12,6 +12,7 @@ class Builder {
     String javaHome='/opt/oracle/java'
     String harmoniaScript = 'eap-job/olympus.sh'
     String gitRepositoryUrl = 'git@github.com:jbossas/jboss-eap7.git'
+    def customParams
 
     def buildAndTest(factory) {
         build(factory)
@@ -39,6 +40,9 @@ class Builder {
                 }
                 parameters {
                     commonParameters(delegate)
+                    if (customParams != null) {
+                        JobSharedUtils.customParams(delegate, customParams)
+                    }
                 }
             }
         }
@@ -60,6 +64,9 @@ class Builder {
                     stringParam {
                         name("PARENT_JOBNAME")
                         defaultValue(parentJobname)
+                    }
+                    if (customParams != null) {
+                        JobSharedUtils.customParams(delegate, customParams)
                     }
                 }
             }
