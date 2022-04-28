@@ -7,7 +7,26 @@ for (version in ["7.4.x", "7.3.x"]) {
     EapView.jobList(this, 'eap-' + version, 'eap-' + version.replace('x','*'))
 }
 
-new eap7.Builder(branch:'7.4.x', jobName:'eap-7.4.x-jdk17', parentJobname:'eap-7.4.x-build').test(this)
+// EAP 7.4.x builds on JDK 8, tests on JDK 17
+new eap7.Builder(branch:'7.4.x', jobName:'eap-7.4.x-jdk17',
+        customParams: {
+            stringParam {
+                name("BUILD_OPTS")
+                defaultValue("-Drelease -DallTests -Delytron -DskipTests")
+            }
+        }).build(this)
+
+new eap7.Builder(branch:'7.4.x', jobName:'eap-7.4.x-jdk17', parentJobname:'eap-7.4.x-jdk17-build', javaHome: "/opt/oracle/jdk-17.0.1",
+        customParams: {
+            stringParam {
+                name("TESTSUITE_OPTS")
+                defaultValue("-Delytron -DnoCompile")
+            }
+            stringParam {
+                name("CGROUP_MOUNT_ENABLED")
+                defaultValue("true")
+            }
+        }).test(this)
 
 for (version in ["7.2.x", "7.1.x", "7.0.x"]) {
 
