@@ -92,4 +92,10 @@ class JobSharedUtils {
             env('PATH', '$PATH:$MAVEN_HOME/bin')
         }
     }
+
+    static customParams(def params, def customParams) {
+        customParams.delegate = params
+        customParams.resolveStrategy = Closure.DELEGATE_FIRST
+        customParams.call()
+    }
 }
