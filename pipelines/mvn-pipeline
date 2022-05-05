@@ -1,3 +1,12 @@
+def dumpParams(String outputFile) {
+  echo "Dumping all parameters to " + outputFile
+  def lines = ""
+  params.each() { param, value ->
+    lines = lines + "${param}=\"${value}\"\n"
+  }
+  writeFile file: outputFile, text: lines
+}
+
 pipeline {
     agent any
 
@@ -34,6 +43,7 @@ pipeline {
                           env.GIT_REPOSITORY_BRANCH = "master"
                         }
                         echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
+                        dumpParams("${env.WORKSPACE}/job_params.txt")
 
                         // Start container
                         env.BUILD_SCRIPT = "${env.WORKSPACE}/hera/mvn-wrapper.sh"
@@ -46,7 +56,7 @@ pipeline {
         }
       stage ('Build') {
             steps {
-                sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
+                sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job ${env.WORKSPACE}/job_params.txt"
                 archiveArtifacts artifacts: '**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
             }
