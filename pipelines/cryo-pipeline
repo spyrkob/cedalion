@@ -151,6 +151,7 @@ pipeline {
     }
     post {
         always {
+            cleanWs()
             script {
              try {
                   sh label: '', script: "${env.WORKSPACE}/hera/hera.sh stop"
