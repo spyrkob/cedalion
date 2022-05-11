@@ -131,7 +131,7 @@ pipeline {
                 }
                 junit "**/target/surefire-reports/*.xml"
                 determineBuildResult()
-            }
+              }
             }
         }
     }
@@ -144,6 +144,7 @@ pipeline {
                   echo "Error while deleting container: ${err}"
               }
             }
+            cleanWs()
         }
         failure {
             mail to: 'jboss-set-ops@redhat.com', from: 'rpelisse@redhat.com',
