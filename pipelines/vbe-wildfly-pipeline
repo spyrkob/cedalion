@@ -1,0 +1,153 @@
+def lookupLastSuccessfulBuildId(String parent_jobname) {
+  echo "Fetching last successful build ID of parent job:" + parent_jobname
+  def lastSuccessfulBuildId = sh(script:"/var/jenkins_home/fetchLastSuccessfulBuildId.sh ${parent_jobname}", returnStdout: true)
+  echo "PARENT JOB LAST SUCCESSFUL BUILD ID: " + lastSuccessfulBuildId
+  if ( "${lastSuccessfulBuildId}".equals("0") ) {
+    error("Build failed because parent job has never run.")
+  }
+  return lastSuccessfulBuildId.trim()
+}
+
+def determineBuildResult() {
+  findText(textFinders: [
+    textFinder(regexp: /.INFO. BUILD FAILURE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
+    textFinder(regexp: /.INFO. BUILD ERROR/, alsoCheckConsoleOutput: true, buildResult: 'FAILURE', changeCondition: 'MATCH_FOUND')
+  ])
+}
+
+pipeline {
+    agent any
+
+   options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+     }
+
+    parameters {
+      string(name: 'RERUN_FAILING_TESTS', defaultValue: '0', description: 'How many time should Maven try to rerun failing tests')
+        // -Dhttps.protocols=TLSv1.2 needs to move to Harmonia?
+    }
+
+    stages {
+        stage('Prep') {
+            steps {
+                cleanWs()
+                script {
+                // assert if job task is build or testsuite
+                env.BUILD_COMMAND = "no-task"
+                echo "JOB_NAME:[${env.JOB_NAME}]"
+                if ( "${env.JOB_NAME}".endsWith("-build") ) {
+                   env.BUILD_COMMAND = "build"
+                } else {
+                if ( "${env.JOB_NAME}".endsWith("-testsuite") ) {
+                        env.BUILD_COMMAND = "testsuite"
+                      } else {
+                         currentBuild.result = 'ABORTED'
+                         error("Invalid JOB_NAME: ${env.JOB_NAME}, can't determine BUILD_COMMAND (missing -build or -testsuite- suffix). Abort.")
+                      }
+                    }
+                    echo "BUILD_COMMAND:[${env.BUILD_COMMAND}]"
+                    // warning, GIT_BRANCH var alreads points to pipeline's branch
+                    if ( env.GIT_REPOSITORY_BRANCH == null || "".equals("${env.GIT_REPOSITORY_BRANCH}") ) {
+                      env.GIT_REPOSITORY_BRANCH = "master"
+                    }
+                    echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
+                }
+                dir('workdir') {
+                  git url: "${env.GIT_REPOSITORY_URL}",
+                      branch: "${env.GIT_REPOSITORY_BRANCH}"
+                }
+                dir('hera') {
+                  git branch: 'vbe', url: 'https://github.com/baranowb/hera.git', poll: false, changelog: false
+                }
+
+                dir('harmonia') {
+                  git branch: 'vbe', url: 'https://github.com/baranowb/harmonia.git', poll: false, changelog: false
+                }
+
+                script {
+                    if ( env.RERUN_FAILING_TESTS == null || "".equals("${env.RERUN_FAILING_TESTS}") ) {
+                      env.RERUN_FAILING_TESTS = 0
+                    }
+                    env.BUILD_SCRIPT = "${env.WORKSPACE}/hera/build-wrapper.sh"
+                    
+               		if( "${env.JOB_NAME}".endsWith("build") ) {
+                            def parent_jobname = "ci-maven-vbe"
+                            def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
+                            assert lastSuccessfulBuildId.isNumber()
+                            env.PARENT_JOB_BUILD_ID = "${lastSuccessfulBuildId}"
+                            env.PARENT_JOB_NAME = "${parent_jobname}"
+                        } else if ( "${env.JOB_NAME}".endsWith("testsuite") ) {
+                            if ( "${env.BUILD_COMMAND}".startsWith("testsuite") ) {
+	                        def parent_jobname = ""
+	                        if ( env.PARENT_JOBNAME && "${env.PARENT_JOBNAME}" != "") {
+	                          parent_jobname = env.PARENT_JOBNAME
+	                        } else {
+	                          parent_jobname = "${env.JOB_NAME}".replace("-testsuite","-build")
+	                          assert ! "".equals(parent_jobname)
+	                        }
+	                        def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
+	                        assert lastSuccessfulBuildId.isNumber()
+	                        env.PARENT_JOB_BUILD_ID = "${lastSuccessfulBuildId}"
+	                        env.PARENT_JOB_NAME = "${parent_jobname}"
+                            }
+               		}
+               		echo "Parent job name: ${env.PARENT_JOB_NAME}"
+                    echo "Parent job build ID: ${env.PARENT_JOB_BUILD_ID}"
+                }
+                echo "BUILD_COMMAND: ${env.BUILD_COMMAND}"
+                // Start container
+              sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
+            }
+        }
+      stage ('Build') {
+            when { expression { env.BUILD_COMMAND == 'build' } }
+            steps {
+                sh label: '', script: 'pwd'
+                sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
+                archiveArtifacts artifacts: '**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
+                findText(textFinders: [
+                    textFinder(regexp: /.INFO. BUILD FAILURE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
+                    textFinder(regexp: /.INFO. BUILD ERROR/, alsoCheckConsoleOutput: true, buildResult: 'FAILURE', changeCondition: 'MATCH_FOUND')
+                ])
+                script {
+                    env.TESTSUITE_JOB_NAME = "${env.JOB_NAME}".replaceAll("-build","-testsuite")
+                    try {
+                        build wait: false, job: "${env.TESTSUITE_JOB_NAME}"
+                    } catch (err) {
+                        echo "[NOTICE] No testsuite '${env.TESTSUITE_JOB_NAME}' associated to this job, no job triggered"
+                    }
+                }
+            }
+        }
+      stage ('Testsuite') {
+            when { expression { env.BUILD_COMMAND == 'testsuite' } }
+            steps {
+              script {
+                try {
+                  sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job"
+                } catch (err) {
+                  echo "Error during build ${err}"
+                }
+                junit "**/target/surefire-reports/*.xml"
+                determineBuildResult()
+            }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+             try {
+                  sh label: '', script: "${env.WORKSPACE}/hera/hera.sh stop"
+              } catch (err) {
+                  echo "Error while deleting container: ${err}"
+              }
+            }
+        }
+        failure {
+            mail to: 'bbaranow@redhat.com', from: 'rpelisse@redhat.com',
+                subject: "Build: ${env.JOB_NAME} - Failed",
+                body: "Job Failed - \"${env.JOB_NAME}\" build: ${env.BUILD_NUMBER}\n\nView the log at:\n ${env.BUILD_URL}\n\nBlue Ocean:\n${env.RUN_DISPLAY_URL}"
+        }
+    }
+}
