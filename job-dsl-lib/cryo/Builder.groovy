@@ -29,12 +29,14 @@ class Builder {
                         sandbox()
                     }
                 }
-                JobSharedUtils.defaultBuildDiscarder(delegate)
+                logRotator {
+                    daysToKeep(30)
+                    numToKeep(2)
+                    artifactDaysToKeep(60)
+                    artifactNumToKeep(2)
+                }
                 properties {
                     JobSharedUtils.doDisableConcurrentBuilds(delegate)
-                }
-                triggers {
-                    scm(JobSharedUtils.DEFAULT_SCHEDULE)
                 }
                 parameters {
                     JobSharedUtils.gitParameters(delegate, 'git@github.com:jbossas/jboss-eap7.git', branch)
@@ -89,7 +91,12 @@ class Builder {
                         sandbox()
                     }
                 }
-                JobSharedUtils.defaultBuildDiscarder(delegate)
+                logRotator {
+                    daysToKeep(30)
+                    numToKeep(2)
+                    artifactDaysToKeep(60)
+                    artifactNumToKeep(2)
+                }
                 properties {
                     JobSharedUtils.doDisableConcurrentBuilds(delegate)
                 }
