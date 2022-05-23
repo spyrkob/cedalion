@@ -60,7 +60,7 @@ pipeline {
                   echo "Error while deleting container: ${err}"
               }
             }
-            archiveArtifacts artifacts: 'workdir/report.html', fingerprint: false
+            archiveArtifacts artifacts: 'workdir/report.html', fingerprint: false, allowEmptyArchive: true
         }
         failure {
             mail to: 'jboss-set-ops@redhat.com,thofman@redhat.com', from: 'rpelisse@redhat.com',
