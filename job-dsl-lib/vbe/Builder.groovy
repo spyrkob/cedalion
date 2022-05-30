@@ -12,6 +12,8 @@ class Builder {
     String javaHome='/opt/oracle/java'
     String harmoniaScript = 'eap-job/olympus.sh'
     String gitRepositoryUrl = 'git@github.com:jbossas/jboss-eap7.git'
+    String vbeChannels = 'https://gitlab.cee.redhat.com/bspyrkos/channels-definitions/-/raw/main/eap-74/src/main/resources/channel.yaml?inline=false'
+    String vbeRepositoryNames = 'jboss-eap-7.4-product-repository'
 
     def buildAndTest(factory) {
         build(factory)
@@ -46,12 +48,12 @@ class Builder {
                     }
                     stringParam {
                         name ("VBE_REPOSITORY_NAMES")
-                        defaultValue('jboss-eap-7.4-product-repository')
+                        defaultValue(vbeRepositoryNames)
                         description('Comma separated list of repository names - as present in maven, if present, this will be used to trim repositories present in reactor.')
                     }
                     stringParam {
                         name ("VBE_CHANNELS")
-                        defaultValue('https://gitlab.cee.redhat.com/bspyrkos/channels-definitions/-/raw/main/eap-74/src/main/resources/channel.yaml?inline=false')
+                        defaultValue(vbeChannels)
                         description('Comma seprated list of URIs to yaml channels')
                     }
                     stringParam {
