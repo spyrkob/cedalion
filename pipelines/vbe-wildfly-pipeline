@@ -57,11 +57,11 @@ pipeline {
                       branch: "${env.GIT_REPOSITORY_BRANCH}"
                 }
                 dir('hera') {
-                  git url: 'https://github.com/baranowb/hera.git', poll: false, changelog: false
+                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
 
                 dir('harmonia') {
-                  git branch: 'olympus', url: 'https://github.com/baranowb/harmonia.git', poll: false, changelog: false
+                  git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
                 }
 
                 script {
