@@ -17,7 +17,7 @@ new eap7.Builder(branch:'xp-4.0.x',
                   stringParam {
                     name("BUILD_OPTS")
                     defaultValue("-Drelease -DnoManualmode")
-                  },
+                  }
                   stringParam {
                     name("TESTSUITE_OPTS")
                     defaultValue("-DnoManualmode")
@@ -30,7 +30,7 @@ new eap7.Builder(branch:'xp-4.0.x-proposed',
                   stringParam {
                     name("BUILD_OPTS")
                     defaultValue("-Drelease -DnoManualmode")
-                  },
+                  }
                   stringParam {
                     name("TESTSUITE_OPTS")
                     defaultValue("-DnoManualmode")
