@@ -12,9 +12,29 @@ new eap7.Builder(branch:'xp-3.0.x-proposed',
 EapView.jobList(this, 'xp-3.0.x', 'xp-3.0.x.*')
 
 new eap7.Builder(branch:'xp-4.0.x',
-                 jobName: 'xp-4.0.x',
+                jobName: 'xp-4.0.x',
+                customParams: {
+                  stringParam {
+                    name("BUILD_OPTS")
+                    defaultValue("-Drelease -DnoManualmode")
+                  },
+                  stringParam {
+                    name("TESTSUITE_OPTS")
+                    defaultValue("-DnoManualmode")
+                  }   
+                }
                 ).buildAndTest(this)
 new eap7.Builder(branch:'xp-4.0.x-proposed',
-                 jobName: 'xp-4.0.x-proposed',
+                jobName: 'xp-4.0.x-proposed',
+                customParams: {
+                  stringParam {
+                    name("BUILD_OPTS")
+                    defaultValue("-Drelease -DnoManualmode")
+                  },
+                  stringParam {
+                    name("TESTSUITE_OPTS")
+                    defaultValue("-DnoManualmode")
+                  }
+                }
                 ).buildAndTest(this)
 EapView.jobList(this, 'xp-4.0.x', 'xp-4.0.x.*')
