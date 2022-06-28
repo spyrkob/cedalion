@@ -11,6 +11,7 @@ class Builder {
     def exclusiveJob(factory) {
         factory.with {
             pipelineJob(jobName) {
+                disabled()
 
                 definition {
                     cps {
@@ -33,6 +34,7 @@ class Builder {
     def concurrentJob(factory) {
         factory.with {
             pipelineJob(jobName) {
+                disabled()
 
                 definition {
                     cps {
