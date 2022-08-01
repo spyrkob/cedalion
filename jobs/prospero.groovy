@@ -18,7 +18,7 @@ pipelineJob('prospero') {
         }
         stringParam {
             name ("MAVEN_GOALS")
-            defaultValue(mavenGoals)
+            defaultValue("")
         }
     }
 }
