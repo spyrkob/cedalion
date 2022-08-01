@@ -23,4 +23,4 @@ pipelineJob('prospero') {
     }
 }
 
-EapView.jobList(this, 'prospero')
+EapView.jobList(this, 'Prospero', 'prospero')
