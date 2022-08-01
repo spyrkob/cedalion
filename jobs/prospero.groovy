@@ -9,7 +9,7 @@ pipelineJob('prospero') {
         }
     }
     parameters {
-        JobSharedUtils.gitParameters(delegate, 'https://github.com/wildfly-extras/prospero.git', 'master')
+        JobSharedUtils.gitParameters(delegate, 'https://github.com/wildfly-extras/prospero.git', 'main')
         JobSharedUtils.mavenParameters(params: delegate, javaHome: '/opt/oracle/openjdk-11.0.14.1_1')
         // override MAVEN_OPTS to add -Dnorpm
         stringParam {
