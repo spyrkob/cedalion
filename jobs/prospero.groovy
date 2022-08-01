@@ -1,6 +1,6 @@
 import util.JobSharedUtils
 
-pipelineJob(jobName) {
+pipelineJob('prospero') {
     // for some reason readFileFromWorkspace doesn't work from within baseJob call
     definition {
         cps {
