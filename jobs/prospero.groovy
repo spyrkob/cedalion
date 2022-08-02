@@ -1,6 +1,6 @@
 import util.JobSharedUtils
 
-pipelineJob('prospero') {
+pipelineJob('prospero-build') {
     // for some reason readFileFromWorkspace doesn't work from within baseJob call
     definition {
         cps {
@@ -18,9 +18,28 @@ pipelineJob('prospero') {
         }
         stringParam {
             name ("MAVEN_GOALS")
-            defaultValue("")
+            defaultValue("clean install -DallTests -Pdist")
         }
     }
 }
 
-EapView.jobList(this, 'Prospero', 'prospero')
+pipelineJob('prospero-eap') {
+    // for some reason readFileFromWorkspace doesn't work from within baseJob call
+    definition {
+        cps {
+            script(readFileFromWorkspace('pipelines/bash-pipeline-test'))
+            sandbox()
+        }
+    }
+    parameters {
+        JobSharedUtils.gitParameters(delegate, 'https://github.com/spyrkob/harmonia.git', 'prospero')
+        JobSharedUtils.mavenParameters(params: delegate, javaHome: '/opt/oracle/openjdk-11.0.14.1_1')
+        // override MAVEN_OPTS to add -Dnorpm
+        stringParam {
+            name("PATH_TO_SCRIPT")
+            defaultValue("./prospero/build-eap.sh")
+        }
+    }
+}
+
+EapView.jobList(this, 'Prospero', 'prospero.*')
