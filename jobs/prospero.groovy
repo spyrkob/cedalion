@@ -18,7 +18,7 @@ pipelineJob('prospero-build') {
         }
         stringParam {
             name ("MAVEN_GOALS")
-            defaultValue("clean install -DallTests -Pdist")
+            defaultValue("clean install -Pdist")
         }
     }
 }
