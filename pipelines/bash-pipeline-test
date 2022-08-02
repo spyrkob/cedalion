@@ -40,7 +40,7 @@ pipeline {
                     def lastSuccessfulBuildId = lookupLastSuccessfulBuildId('prospero-build')
                     assert lastSuccessfulBuildId.isNumber()
                     env.PARENT_JOB_BUILD_ID = "${lastSuccessfulBuildId}"
-                    env.PARENT_JOB_NAME = "prospero"
+                    env.PARENT_JOB_NAME = "prospero-build"
                     echo "Parent job name: ${env.PARENT_JOB_NAME}"
                     echo "Parent job build ID: ${env.PARENT_JOB_BUILD_ID}"
                 }
