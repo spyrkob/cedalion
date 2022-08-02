@@ -50,7 +50,6 @@ pipeline {
                     dumpParams("${env.WORKSPACE}/job_params.txt")
                     sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
                     sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job ${env.WORKSPACE}/job_params.txt"
-                    archiveArtifacts artifacts: 'workdir/**/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                     findText(textFinders: [
                         textFinder(regexp: /MOLECULE_EXIT_CODE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
                     ])
