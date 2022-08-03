@@ -38,13 +38,13 @@ pipeline {
                       env.GIT_REPOSITORY_BRANCH = "master"
                     }
                     echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
-                }
 
-                def parent_jobname = "ansible-janus-${env.PROJECT_NAME}"
-                def parent_jobhome= "/jenkins_jobs/${parent_jobname}/"
-                env.PARENT_JOB_PERMALINK = "${parent_jobhome}/builds/permalinks"
-                def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
-                assert lastSuccessfulBuildId.isNumber()
+                    def parent_job_name = "ansible-janus-${env.PROJECT_NAME}"
+                    def parent_job_home= "/jenkins_jobs/${parent_jobname}/"
+                    env.PARENT_JOB_PERMALINK = "${parent_job_home}/builds/permalinks"
+                    def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
+                    assert lastSuccessfulBuildId.isNumber()
+                }
 
                 dir('hera') {
                   git branch: 'jenkins_jobs_vol', url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
