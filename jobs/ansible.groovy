@@ -17,7 +17,7 @@ new ansibleCi.Builder(projectName:'infinispan', moleculeBuildId: 25001).build(th
 new ansibleCi.Builder(projectName:'keycloak', moleculeBuildId: 26001).build(this)
 new ansibleCi.Builder(projectName:'amq', scenarioName: 'default,amq_upgrade', moleculeBuildId: 27001).build(this)
 new ansibleCi.Builder(projectName:'jws-dot', moleculeBuildId: 28001, gitUrl: "git@gitlab:ansible-middleware/").build(this)
-new ansibleCi.Builder(projectName:'zeus', moleculeBuildId: 29001, gitUrl: "https://github.com/jboss-set/zeus.git", branch: 'mol_tests').build(this)
+new ansibleCi.Builder(projectName:'zeus', moleculeBuildId: 29001, gitUrl: "https://github.com/jboss-set/", branch: 'mol_tests').build(this)
 EapView.jobList(this, 'Ansible CI', 'ansible-ci.*')
 new ansibleCi.Builder(projectName:'wildfly-cluster-demo', projectPrefix: 'ansible', moleculeBuildId: 40001).build(this)
 new ansibleCi.Builder(projectName:'flange-demo', branch: 'master', projectPrefix: 'ansible', moleculeBuildId: 40002).build(this)
