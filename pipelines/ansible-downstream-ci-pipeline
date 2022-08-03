@@ -39,9 +39,9 @@ pipeline {
                     }
                     echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
 
-                    def parent_job_name = "ansible-janus-${env.PROJECT_NAME}"
-                    def parent_job_home= "/jenkins_jobs/${parent_jobname}/"
-                    env.PARENT_JOB_PERMALINK = "${parent_job_home}/builds/permalinks"
+                    env.PARENT_JOB_NAME = "ansible-janus-${env.PROJECT_NAME}"
+                    env.PARENT_JOB_HOME = "/jenkins_jobs/${env.PARENT_JOB_NAME}/"
+                    env.PARENT_JOB_PERMALINK = "${env.PARENT_JOB_HOME}/builds/permalinks"
                     def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
                     assert lastSuccessfulBuildId.isNumber()
                 }
