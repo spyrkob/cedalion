@@ -47,15 +47,16 @@ pipeline {
                 assert lastSuccessfulBuildId.isNumber()
 
                 dir('hera') {
-                  git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
+                  git branch: 'jenkins_jobs_vol', url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
 
                 dir('harmonia') {
-                  git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
+                  git branch: 'downstream_ci', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
                 }
 
                 dir('workdir') {
-                  //TODO: if tag provided then => git url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
+                  //TODO:
+                  // if tag provided then => git url: "${env.GIT_REPOSITORY_URL}(gitlab)", branch: "${env.GIT_REPOSITORY_BRANCH}(tag)"
                   // else:
                   echo "Run Molecule CI ${env.JOB_NAME} with last successful Janus build: ${lastSuccessfulBuildId}."
                   sh "cp -Rv ${parent_jobhome}/builds/${lastSuccessfulBuildId}/archive/workdir/downstream/jws/* ."
