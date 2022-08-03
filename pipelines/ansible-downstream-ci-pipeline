@@ -42,7 +42,7 @@ pipeline {
                     env.PARENT_JOB_NAME = "ansible-janus-${env.PROJECT_NAME}"
                     env.PARENT_JOB_HOME = "/jenkins_jobs/${env.PARENT_JOB_NAME}/"
                     env.PARENT_JOB_PERMALINK = "${env.PARENT_JOB_HOME}/builds/permalinks"
-                    def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
+                    def lastSuccessfulBuildId = lookupLastSuccessfulBuildId("${env.PARENT_JOB_NAME}")
                     assert lastSuccessfulBuildId.isNumber()
                 }
 
