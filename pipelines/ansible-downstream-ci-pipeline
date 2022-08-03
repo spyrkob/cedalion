@@ -22,6 +22,11 @@ pipeline {
                     echo "JOB_NAME:[${env.JOB_NAME}]"
                     echo "SCRIPT:[${env.PATH_TO_SCRIPT}]"
                     echo "MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL:[${env.MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL}]"
+                    // warning, GIT_BRANCH var alreads points to pipeline's branch
+                    if ( env.GIT_REPOSITORY_BRANCH == null || "".equals("${env.GIT_REPOSITORY_BRANCH}") ) {
+                      env.GIT_REPOSITORY_BRANCH = "master"
+                    }
+                    echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
                 }
 
                 dir('hera') {
@@ -30,6 +35,10 @@ pipeline {
 
                 dir('harmonia') {
                   git branch: 'olympus', url: 'https://github.com/jboss-set/harmonia.git', poll: false, changelog: false
+                }
+
+                dir('workdir') {
+                  git url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
                 }
 
                 dir('eris') {
@@ -41,10 +50,8 @@ pipeline {
                     env.WORKDIR = "${env.WORKSPACE}/workdir/"
                     env.MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL = "${env.MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL}"
                     dumpParams("${env.WORKSPACE}/job_params.txt")
-                    sh label: 'create workdir', script: "mkdir -p ${env.WORKDIR}"
                     sh label: '', script: "${env.WORKSPACE}/hera/hera.sh run"
                     sh label: '', script: "${env.WORKSPACE}/hera/hera.sh job ${env.WORKSPACE}/job_params.txt"
-                    archiveArtifacts artifacts: "${env.WORKDIR}/**/*", fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
                     findText(textFinders: [
                         textFinder(regexp: /MOLECULE_EXIT_CODE/, alsoCheckConsoleOutput: true, buildResult: 'UNSTABLE', changeCondition: 'MATCH_FOUND'),
                     ])
