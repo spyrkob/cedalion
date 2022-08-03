@@ -1,3 +1,14 @@
+def lookupLastSuccessfulBuildId(String parent_jobname) {
+  echo "Fetching last successful build ID of parent job:" + parent_jobname
+  def lastSuccessfulBuildId = sh(script:"/var/jenkins_home/fetchLastSuccessfulBuildId.sh ${parent_jobname}", returnStdout: true)
+  echo "PARENT JOB LAST SUCCESSFUL BUILD ID: " + lastSuccessfulBuildId
+  if ( "${lastSuccessfulBuildId}".equals("0") ) {
+    error("Build failed because parent job has never run.")
+  }
+  return lastSuccessfulBuildId.trim()
+}
+
+
 def dumpParams(String outputFile) {
   echo "Dumping all parameters to " + outputFile
   def lines = ""
@@ -29,6 +40,12 @@ pipeline {
                     echo "GIT_REPOSITORY_BRANCH:[${env.GIT_REPOSITORY_BRANCH}]"
                 }
 
+                def parent_jobname = "ansible-janus-${env.PROJECT_NAME}"
+                def parent_jobhome= "/jenkins_jobs/${parent_jobname}/"
+                env.PARENT_JOB_PERMALINK = "${parent_jobhome}/builds/permalinks"
+                def lastSuccessfulBuildId = lookupLastSuccessfulBuildId(parent_jobname)
+                assert lastSuccessfulBuildId.isNumber()
+
                 dir('hera') {
                   git url: 'https://github.com/jboss-set/hera.git', poll: false, changelog: false
                 }
@@ -38,7 +55,10 @@ pipeline {
                 }
 
                 dir('workdir') {
-                  git url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
+                  //TODO: if tag provided then => git url: "${env.GIT_REPOSITORY_URL}", branch: "${env.GIT_REPOSITORY_BRANCH}"
+                  // else:
+                  echo "Run Molecule CI ${env.JOB_NAME} with last successful Janus build: ${lastSuccessfulBuildId}."
+                  sh "cp -Rv ${parent_jobhome}/builds/${lastSuccessfulBuildId}/archive/workdir/downstream/jws/* ."
                 }
 
                 dir('eris') {
