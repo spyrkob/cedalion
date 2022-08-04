@@ -25,7 +25,7 @@ new ansibleCi.Builder(projectName:'eap-migration-demo', branch: 'main', projectP
 EapView.jobList(this, 'Ansible Demos', '^.*-demo')
 // Janus jobs - generating downstream collections
 new ansible.Builder(projectName:'janus', jobSuffix: '-redhat_csp_download', playbook: 'playbooks/redhat_csp_download.yml').build(this)
-new ansible.Builder(projectName:'janus', jobSuffix: '-jws', playbook: 'playbooks/jws.yml').build(this)
+new ansible.Builder(projectName:'janus', jobSuffix: '-jws-ansible-playbook', playbook: 'playbooks/jws.yml').build(this)
 new ansible.Builder(projectName:'janus', jobSuffix: '-jboss_eap', playbook: 'playbooks/jboss_eap.yml').build(this)
 new ansible.Builder(projectName:'janus', jobSuffix: '-jboss_data_grid', playbook: 'playbooks/jboss_data_grid.yml').build(this)
 new ansible.Builder(projectName:'janus', jobSuffix: '-rh_sso', playbook: 'playbooks/rh_sso.yml').build(this)
