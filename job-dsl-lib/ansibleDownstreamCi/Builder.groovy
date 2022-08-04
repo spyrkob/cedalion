@@ -63,6 +63,14 @@ class Builder {
                       name ("BUILD_MOLECULE_SLAVE_SSHD_PORT")
                       defaultValue(moleculeBuildId)
                     }
+                    stringParam {
+                      name ("JENKINS_JOBS_VOLUME_ENABLED")
+                      defaultValue('True')
+                    }
+                    stringParam {
+                      name ("MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL")
+                      defaultValue(MIDDLEWARE_DOWNLOAD_RELEASE_SERVER_URL)
+                    }
                 }
             }
         }

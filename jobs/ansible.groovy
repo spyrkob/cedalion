@@ -46,5 +46,5 @@ new ansibleDownstreamRunner.Builder(
   ).build(this)
 EapView.jobList(this, 'Ansible Downstream Runner', '^ansible-downstream-runner-.*$')
 new ansibleDownstreamCi.Builder(projectName: 'jws-ansible-playbook').build(this)
-new ansibleDownstreamCi.Builder(projectName: 'jboss_eap').build(this)
+new ansibleDownstreamCi.Builder(projectName: 'jboss_eap', moleculeBuildId: 50001).build(this)
 EapView.jobList(this, 'Ansible Downstream CI', 'ansible-downstream-ci.*$')
