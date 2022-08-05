@@ -45,6 +45,6 @@ new ansibleDownstreamRunner.Builder(
   products_paths: '/eap7/7.4.5/jboss-eap-7.4.5.zip'
   ).build(this)
 EapView.jobList(this, 'Ansible Downstream Runner', '^ansible-downstream-runner-.*$')
-new ansibleDownstreamCi.Builder(projectName: 'jws-ansible-playbook').build(this)
-new ansibleDownstreamCi.Builder(projectName: 'jboss_eap', moleculeBuildId: 50001).build(this)
+new ansibleDownstreamCi.Builder(projectName: 'jws-ansible-playbook', moleculeBuildId: 50001).build(this)
+new ansibleDownstreamCi.Builder(projectName: 'jboss_eap', moleculeBuildId: 50002).build(this)
 EapView.jobList(this, 'Ansible Downstream CI', 'ansible-downstream-ci.*$')
