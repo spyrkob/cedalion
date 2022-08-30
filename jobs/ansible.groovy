@@ -10,7 +10,6 @@ new ansibleCi.Builder(projectName:'wildfly', moleculeBuildId: 23001).build(this)
 new ansibleCi.Builder(projectName:'infinispan', moleculeBuildId: 25001).build(this)
 new ansibleCi.Builder(projectName:'keycloak', moleculeBuildId: 26001).build(this)
 new ansibleCi.Builder(projectName:'amq', scenarioName: 'default,amq_upgrade', moleculeBuildId: 27001).build(this)
-new ansibleCi.Builder(projectName:'jws-dot', moleculeBuildId: 28001, gitUrl: "git@gitlab:ansible-middleware/").build(this)
 //new ansibleCi.Builder(projectName:'zeus', moleculeBuildId: 29001, gitUrl: "https://github.com/jboss-set/", branch: 'olympus').build(this)
 EapView.jobList(this, 'Ansible CI', 'ansible-ci.*')
 // CI jobs for downstream (Janus generated) collections

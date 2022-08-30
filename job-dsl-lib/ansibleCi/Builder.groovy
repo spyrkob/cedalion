@@ -49,6 +49,14 @@ class Builder {
                       defaultValue(branch)
                     }
                     stringParam {
+                      name ("HARMONIA_REPO")
+                      defaultValue('https://github.com/jboss-set/harmonia.git')
+                    }
+                    stringParam {
+                      name ("HARMONIA_BRANCH")
+                      defaultValue('olympus')
+                    }
+                    stringParam {
                       name ("BUILD_PODMAN_IMAGE")
                       defaultValue("localhost/molecule-runner")
                     }
