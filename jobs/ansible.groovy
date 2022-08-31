@@ -13,10 +13,10 @@ new ansibleCi.Builder(projectName:'amq', scenarioName: 'default,amq_upgrade', mo
 //new ansibleCi.Builder(projectName:'zeus', moleculeBuildId: 29001, gitUrl: "https://github.com/jboss-set/", branch: 'olympus').build(this)
 EapView.jobList(this, 'Ansible CI', 'ansible-ci.*')
 // CI jobs for downstream (Janus generated) collections
-downstreamCIJob('jws', "50001")
-downstreamCIJob('jboss_eap', "50002")
-downstreamCIJob('jws-dot', "50003")
-downstreamCIJob('amq', "50004", scenarioName: 'default,amq_upgrade')
+downstreamCIJob('jws', "30001")
+downstreamCIJob('jboss_eap', "30002")
+downstreamCIJob('jws-dot', "30003")
+downstreamCIJob('amq', "30004", scenarioName: 'default,amq_upgrade')
 EapView.jobList(this, 'Ansible Downstream CI', 'ansible-downstream-ci.*$')
 // CI Jobs for demos
 new ansibleCi.Builder(projectName:'wildfly-cluster-demo', projectPrefix: 'ansible', moleculeBuildId: 40001).build(this)
@@ -46,6 +46,3 @@ new ansibleDownstreamRunner.Builder(
   products_paths: '/eap7/7.4.5/jboss-eap-7.4.5.zip'
   ).build(this)
 EapView.jobList(this, 'Ansible Downstream Runner', '^ansible-downstream-runner-.*$')
-new ansibleCi.Builder(projectName: 'jws', moleculeBuildId: 50001).build(this)
-new ansibleCi.Builder(projectName: 'jboss_eap', moleculeBuildId: 50002).build(this)
-new ansibleCi.Builder(projectName: 'amq', moleculeBuildId: 50003).build(this)
